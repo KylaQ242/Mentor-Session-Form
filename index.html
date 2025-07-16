@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Mentor Session</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Save/Load Controls */
+        .save-controls {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .save-controls h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .collaboration-info {
+            background: #f0f9ff;
+            border: 1px solid #0284c7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .collaboration-info h3 {
+            color: #0284c7;
+            margin-bottom: 15px;
+        }
+
+        .section-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input.mentee-field, .form-select.mentee-field, .form-textarea.mentee-field {
+            border-left: 4px solid #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .form-input.mentor-field, .form-select.mentor-field, .form-textarea.mentor-field {
+            border-left: 4px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .form-input.shared-field, .form-select.shared-field, .form-textarea.shared-field {
+            border-left: 4px solid #8b5cf6;
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .field-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .field-indicator.mentee {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+
+        .field-indicator.mentor {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+        }
+
+        .field-indicator.shared {
+            background: rgba(139, 92, 246, 0.1);
+            color: #6d28d9;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .info-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box.blue {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .info-box.green {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+
+        .info-box.purple {
+            background: #e9d5ff;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .info-box h3 {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .completion-section {
+            background: #dbeafe;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .completion-section h3 {
+            margin-bottom: 20px;
+            color: #1e40af;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Collaborative Mentor Session</h1>
+            <p>Time Management, Delegation & Effectiveness - AGCelerate U Integration</p>
+        </div>
+
+        <!-- Save/Load Controls -->
+        <div class="save-controls">
+            <h3>💾 Session Management</h3>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="autoSave()">🔄 Auto Save</button>
+                <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
+                <button class="btn btn-secondary" onclick="loadSession()">📂 Load Session</button>
+                <button class="btn btn-secondary" onclick="exportSession()">📄 Export as Text</button>
+                <button class="btn btn-secondary" onclick="clearForm()">🗑️ Clear Form</button>
+            </div>
+            <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFileLoad(event)">
+            <p style="margin-top: 15px; font-size: 0.9rem; color: #856404;">
+                <strong>💡 Auto-save:</strong> Your progress is automatically saved every 30 seconds to your browser's memory.
+            </p>
+        </div>
+
+        <!-- Collaboration Instructions -->
+        <div class="collaboration-info">
+            <h3>👥 How to Collaborate Together</h3>
+            <p><strong>Simple Approach:</strong> Both mentor and mentee work on this same form together during your meeting.</p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Share your screen</strong> in Teams so both can see the form</li>
+                <li><strong>Take turns typing</strong> - mentor fills blue sections, mentee fills green sections</li>
+                <li><strong>Collaborate on purple sections</strong> - discuss and agree on content together</li>
+                <li><strong>Auto-saves every 30 seconds</strong> - your progress is preserved</li>
+            </ul>
+            <p style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; font-size: 0.9rem;">
+                <strong>💡 Tip:</strong> Use Teams screen sharing so both people can see the form being filled out in real-time.
+            </p>
+        </div>
+
+        <!-- Color Coding Legend -->
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+            <h4 style="margin-bottom: 10px; color: #374151;">📋 Who Fills What:</h4>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 20px; height: 12px; background: rgba(16, 185, 129, 0.3); border-left: 4px solid #10b981; border-radius: 2px;"></div>
+                    <span style="font-size: 0.875rem; color: #047857; font-weight: 500;">📚 Mentee types in these fields</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 20px; height: 12px; background: rgba(59, 130, 246, 0.3); border-left: 4px solid #3b82f6; border-radius: 2px;"></div>
+                    <span style="font-size: 0.875rem; color: #1d4ed8; font-weight: 500;">🎓 Mentor types in these fields</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 20px; height: 12px; background: rgba(139, 92, 246, 0.3); border-left: 4px solid #8b5cf6; border-radius: 2px;"></div>
+                    <span style="font-size: 0.875rem; color: #6d28d9; font-weight: 500;">👥 Discuss together & agree on content</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meeting Details Section -->
+        <div class="section-content">
+            <h2 class="section-title">Meeting Details</h2>
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label class="form-label">Date <span class="field-indicator shared">👥 BOTH</span></label>
+                    <input type="date" class="form-input shared-field" id="date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Time <span class="field-indicator shared">👥 BOTH</span></label>
+                    <input type="time" class="form-input shared-field" id="startTime">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mentee Name <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <input type="text" class="form-input mentee-field" id="menteeName" placeholder="Mentee types their name here">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mentor Name <span class="field-indicator mentor">🎓 MENTOR</span></label>
+                    <input type="text" class="form-input mentor-field" id="mentorName" placeholder="Mentor types their name here">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Meeting Location/Platform <span class="field-indicator shared">👥 BOTH</span></label>
+                <input type="text" class="form-input shared-field" id="location" placeholder="e.g., Conference Room A, Teams Meeting">
+            </div>
+        </div>
+
+        <!-- Opening & Check-in Section -->
+        <div class="section-content">
+            <h2 class="section-title">Opening & Check-in (15 minutes)</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Mentee Share: How have you applied learnings in Time Management, Delegation, or Effectiveness? <span class="field-indicator mentee">📚 MENTEE</span></label>
+                <textarea class="form-textarea mentee-field" id="menteeShare" placeholder="Mentee shares examples while mentor listens, then mentee types the key points here..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Mentor Observations: What changes have you noticed in the mentee's approach? <span class="field-indicator mentor">🎓 MENTOR</span></label>
+                <textarea class="form-textarea mentor-field" id="mentorObservations" placeholder="Mentor shares observations while mentee listens, then mentor types the key points here..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Session Intentions: What specific outcomes do we want to achieve? <span class="field-indicator shared">👥 BOTH</span></label>
+                <textarea class="form-textarea shared-field" id="sessionIntentions" placeholder="Discuss together and agree on session goals - either person can type the agreed outcomes..."></textarea>
+            </div>
+        </div>
+
+        <!-- AGCelerate U Learning Review Section -->
+        <div class="section-content">
+            <h2 class="section-title">AGCelerate U Learning Review (20 minutes)</h2>
+            
+            <div class="info-box blue">
+                <h3>Key Learning Highlights (10 minutes)</h3>
+                <p>Most significant insights from AGCelerate U related to Time Management, Delegation & Effectiveness:</p>
+            </div>
+            
+            <div class="grid grid-3">
+                <div class="form-group">
+                    <label class="form-label">1. Time Management Insight <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <input type="text" class="form-input mentee-field" id="insight1" placeholder="Mentee shares insight, then types it here">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">2. Delegation Insight <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <input type="text" class="form-input mentee-field" id="insight2" placeholder="Mentee shares insight, then types it here">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">3. Effectiveness Insight <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <input type="text" class="form-input mentee-field" id="insight3" placeholder="Mentee shares insight, then types it here">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">New frameworks/tools learned for productivity and leadership effectiveness <span class="field-indicator mentee">📚 MENTEE</span></label>
+                <textarea class="form-textarea mentee-field" id="concepts" placeholder="e.g., Eisenhower Matrix, RACI model, OKRs, delegation frameworks..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Personal productivity and leadership style discoveries <span class="field-indicator mentee">📚 MENTEE</span></label>
+                <textarea class="form-textarea mentee-field" id="discoveries" placeholder="What did you learn about your approach to time, delegation, and effectiveness..."></textarea>
+            </div>
+            
+            <div class="info-box green">
+                <h3>Application Successes & Challenges (10 minutes)</h3>
+                
+                <h4 style="margin: 20px 0 10px 0;">Successful applications: <span class="field-indicator mentee">📚 MENTEE LEADS</span></h4>
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label class="form-label">Situation:</label>
+                        <textarea class="form-textarea mentee-field" id="successSituation" placeholder="Describe where you applied the concepts..." style="min-height: 80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Concept/Tool Applied:</label>
+                        <textarea class="form-textarea mentee-field" id="successConcept" placeholder="What specific framework or tool was used..." style="min-height: 80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Result/Impact:</label>
+                        <textarea class="form-textarea mentee-field" id="successResult" placeholder="What was the productivity or effectiveness outcome..." style="min-height: 80px;"></textarea>
+                    </div>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px 0;">Challenging applications: <span class="field-indicator shared">👥 BOTH DISCUSS</span></h4>
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label class="form-label">Situation:</label>
+                        <textarea class="form-textarea shared-field" id="challengeSituation" placeholder="Describe the challenging situation..." style="min-height: 80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Concept/Tool Attempted:</label>
+                        <textarea class="form-textarea shared-field" id="challengeConcept" placeholder="What was attempted but didn't work as expected..." style="min-height: 80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Lesson Learned:</label>
+                        <textarea class="form-textarea shared-field" id="challengeResult" placeholder="What was learned from this challenge..." style="min-height: 80px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leadership Competency Deep Dive Section -->
+        <div class="section-content">
+            <h2 class="section-title">Leadership Competency Deep Dive (45 minutes)</h2>
+            
+            <div class="info-box purple">
+                <h3>Competency Assessment & Development Planning</h3>
+                <p>Deep dive into your selected competency: Time Management, Delegation, or Effectiveness</p>
+            </div>
+            
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label class="form-label">Mentee Self-Assessment (1-5) <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <select class="form-select mentee-field" id="selfAssessment">
+                        <option value="">Select your current level</option>
+                        <option value="1">1 - Developing (just starting to learn)</option>
+                        <option value="2">2 - Progressing (applying some concepts)</option>
+                        <option value="3">3 - Competent (consistently applying)</option>
+                        <option value="4">4 - Proficient (highly effective)</option>
+                        <option value="5">5 - Expert (teaching others)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Mentor Assessment (1-5) <span class="field-indicator mentor">🎓 MENTOR</span></label>
+                    <select class="form-select mentor-field" id="mentorAssessment">
+                        <option value="">Select mentee's level</option>
+                        <option value="1">1 - Developing (just starting to learn)</option>
+                        <option value="2">2 - Progressing (applying some concepts)</option>
+                        <option value="3">3 - Competent (consistently applying)</option>
+                        <option value="4">4 - Proficient (highly effective)</option>
+                        <option value="5">5 - Expert (teaching others)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">AGCelerate U Connection: How did the program help with this competency? <span class="field-indicator mentee">📚 MENTEE</span></label>
+                <textarea class="form-textarea mentee-field" id="agcelerateConnection" placeholder="Connect your learning to specific AGCelerate U content, frameworks, or tools..."></textarea>
+            </div>
+            
+            <div class="info-box blue">
+                <h3>Evidence & Examples</h3>
+                <div class="form-group">
+                    <label class="form-label">Specific Example: Describe a situation where you applied this competency <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <textarea class="form-textarea mentee-field" id="specificExample" placeholder="Describe the situation, what you did, and the outcome..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Mentor Observations: What behaviors have you observed? <span class="field-indicator mentor">🎓 MENTOR</span></label>
+                    <textarea class="form-textarea mentor-field" id="mentorObservationsCompetency" placeholder="Describe specific behaviors and situations you've observed..."></textarea>
+                </div>
+            </div>
+            
+            <div class="info-box" style="background: #fed7aa; border-left: 4px solid #ea580c;">
+                <h3>Development Planning</h3>
+                <div class="form-group">
+                    <label class="form-label">Development Target: Where do you want to be by next quarter? <span class="field-indicator shared">👥 BOTH</span></label>
+                    <select class="form-select shared-field" id="developmentTarget">
+                        <option value="">Select target level</option>
+                        <option value="2">2 - Progressing (applying some concepts)</option>
+                        <option value="3">3 - Competent (consistently applying)</option>
+                        <option value="4">4 - Proficient (highly effective)</option>
+                        <option value="5">5 - Expert (teaching others)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Specific Action Steps: What will you do to develop this competency? <span class="field-indicator shared">👥 BOTH</span></label>
+                    <textarea class="form-textarea shared-field" id="actionSteps" placeholder="List specific, actionable steps for competency development..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Support Needed: What support or resources are needed? <span class="field-indicator shared">👥 BOTH</span></label>
+                    <textarea class="form-textarea shared-field" id="supportNeeded" placeholder="Identify mentoring, training, or other support needed..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Objectives Section -->
+        <div class="section-content">
+            <h2 class="section-title">Quarterly Learning Objectives (10 minutes)</h2>
+            
+            <div class="info-box blue">
+                <h3>OBJECTIVE 1: Skill Development <span class="field-indicator shared">👥 BOTH</span></h3>
+                <div class="form-group">
+                    <label class="form-label">What specific skill will you develop?</label>
+                    <textarea class="form-textarea shared-field" id="obj1Skill" placeholder="Describe the skill to develop..."></textarea>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label">By When:</label>
+                        <input type="date" class="form-input shared-field" id="obj1Date">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Success Measure:</label>
+                        <input type="text" class="form-input shared-field" id="obj1Measure" placeholder="How will you measure success...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box green">
+                <h3>OBJECTIVE 2: Application Focus <span class="field-indicator shared">👥 BOTH</span></h3>
+                <div class="form-group">
+                    <label class="form-label">How will you apply AGCelerate U learnings?</label>
+                    <textarea class="form-textarea shared-field" id="obj2Application" placeholder="Describe how you'll apply the learnings..."></textarea>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label">By When:</label>
+                        <input type="date" class="form-input shared-field" id="obj2Date">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Success Measure:</label>
+                        <input type="text" class="form-input shared-field" id="obj2Measure" placeholder="How will you measure success...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box" style="background: #fed7aa; border-left: 4px solid #ea580c;">
+                <h3>OBJECTIVE 3: Impact Goal <span class="field-indicator shared">👥 BOTH</span></h3>
+                <div class="form-group">
+                    <label class="form-label">What impact do you want to create?</label>
+                    <textarea class="form-textarea shared-field" id="obj3Impact" placeholder="Describe the impact you want to achieve..."></textarea>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label">By When:</label>
+                        <input type="date" class="form-input shared-field" id="obj3Date">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Success Measure:</label>
+                        <input type="text" class="form-input shared-field" id="obj3Measure" placeholder="How will you measure success...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wrap-up & Next Steps Section -->
+        <div class="section-content">
+            <h2 class="section-title">Wrap-up & Next Steps (5 minutes)</h2>
+            
+            <div class="grid grid-2">
+                <div class="info-box blue">
+                    <h3>Mentor Commitments <span class="field-indicator mentor">🎓 MENTOR</span></h3>
+                    <textarea class="form-textarea mentor-field" id="mentorCommitments" placeholder="What will the mentor provide or do..."></textarea>
+                </div>
+                
+                <div class="info-box green">
+                    <h3>Mentee Commitments <span class="field-indicator mentee">📚 MENTEE</span></h3>
+                    <textarea class="form-textarea mentee-field" id="menteeCommitments" placeholder="What will the mentee practice or do..."></textarea>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Key Takeaways <span class="field-indicator shared">👥 BOTH</span></label>
+                <textarea class="form-textarea shared-field" id="keyTakeaways" placeholder="What are the main takeaways from this session..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Next Meeting Date <span class="field-indicator shared">👥 BOTH</span></label>
+                <input type="date" class="form-input shared-field" id="nextMeetingDate">
+            </div>
+        </div>
+
+        <!-- Notes & Final Commitments Section -->
+        <div class="section-content">
+            <h2 class="section-title">Notes & Final Commitments</h2>
+            
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label class="form-label">Mentor Final Notes <span class="field-indicator mentor">🎓 MENTOR</span></label>
+                    <textarea class="form-textarea mentor-field" id="mentorFinalNotes" placeholder="Additional mentor observations and notes..." style="min-height: 150px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mentee Final Reflections <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <textarea class="form-textarea mentee-field" id="menteeFinalReflections" placeholder="Additional mentee thoughts and reflections..." style="min-height: 150px;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session Completion -->
+        <div class="completion-section">
+            <h3>Session Completion</h3>
+            <div class="grid grid-2" style="margin: 20px 0;">
+                <div style="text-align: left;">
+                    <label class="form-label">Mentor Signature <span class="field-indicator mentor">🎓 MENTOR</span></label>
+                    <input type="text" class="form-input mentor-field" id="mentorSignature" placeholder="Type name to sign">
+                </div>
+                <div style="text-align: left;">
+                    <label class="form-label">Mentee Signature <span class="field-indicator mentee">📚 MENTEE</span></label>
+                    <input type="text" class="form-input mentee-field" id="menteeSignature" placeholder="Type name to sign">
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 15px;">
+                    ✅ Session complete! Use the export button to save your session or Ctrl+P to print.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoSaveInterval;
+
+        // Set today's date when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateField = document.getElementById('date');
+            if (dateField) {
+                dateField.value = today;
+            }
+            
+            // Load any previously saved data
+            loadAutoSavedData();
+            
+            // Start auto-save
+            startAutoSave();
+        });
+
+        // Auto-save functionality
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                autoSave();
+            }, 30000); // Save every 30 seconds
+        }
+
+        function autoSave() {
+            const formData = collectFormData();
+            formData.autoSaveTime = new Date().toISOString();
+            localStorage.setItem('mentorSessionAutoSave', JSON.stringify(formData));
+            showToast('Auto-saved', 'success');
+        }
+
+        function loadAutoSavedData() {
+            const autoSavedData = localStorage.getItem('mentorSessionAutoSave');
+            if (autoSavedData) {
+                try {
+                    const data = JSON.parse(autoSavedData);
+                    populateForm(data);
+                    showToast('Previous session restored', 'success');
+                } catch (e) {
+                    console.error('Error loading auto-saved data:', e);
+                }
+            }
+        }
+
+        // Collect all form data
+        function collectFormData() {
+            const formElements = document.querySelectorAll('input, select, textarea');
+            const data = {};
+            
+            formElements.forEach(element => {
+                if (element.id) {
+                    data[element.id] = element.value;
+                }
+            });
+            
+            return data;
+        }
+
+        // Populate form with data
+        function populateForm(data) {
+            Object.keys(data).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = data[key];
+                }
+            });
+        }
+
+        // Save session to file
+        function saveSession() {
+            const formData = collectFormData();
+            formData.exportTime = new Date().toISOString();
+            
+            const menteeName = formData.menteeName || 'Mentee';
+            const mentorName = formData.mentorName || 'Mentor';
+            const date = formData.date || 'Session';
+            
+            const filename = `MentorSession_${menteeName}_${mentorName}_${date}.json`;
+            
+            const dataStr = JSON.stringify(formData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = filename;
+            link.click();
+            
+            showToast('Session saved successfully', 'success');
+        }
+
+        // Load session from file
+        function loadSession() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        populateForm(data);
+                        showToast('Session loaded successfully', 'success');
+                    } catch (error) {
+                        showToast('Error loading file', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Export session as readable text
+        function exportSession() {
+            const formData = collectFormData();
+            let output = "COLLABORATIVE MENTOR SESSION REPORT\n";
+            output += "=====================================\n\n";
+            
+            output += "MEETING DETAILS\n";
+            output += "---------------\n";
+            output += `Date: ${formData.date || 'Not specified'}\n`;
+            output += `Start Time: ${formData.startTime || 'Not specified'}\n`;
+            output += `Mentee: ${formData.menteeName || 'Not specified'}\n`;
+            output += `Mentor: ${formData.mentorName || 'Not specified'}\n`;
+            output += `Location: ${formData.location || 'Not specified'}\n\n`;
+            
+            output += "OPENING & CHECK-IN\n";
+            output += "------------------\n";
+            output += `Mentee Share: ${formData.menteeShare || 'Not completed'}\n\n`;
+            output += `Mentor Observations: ${formData.mentorObservations || 'Not completed'}\n\n`;
+            output += `Session Intentions: ${formData.sessionIntentions || 'Not completed'}\n\n`;
+            
+            output += "AGCELERATE U LEARNING REVIEW\n";
+            output += "----------------------------\n";
+            output += `Time Management Insight: ${formData.insight1 || 'Not completed'}\n`;
+            output += `Delegation Insight: ${formData.insight2 || 'Not completed'}\n`;
+            output += `Effectiveness Insight: ${formData.insight3 || 'Not completed'}\n\n`;
+            
+            output += `New Frameworks/Tools: ${formData.concepts || 'Not completed'}\n\n`;
+            output += `Personal Discoveries: ${formData.discoveries || 'Not completed'}\n\n`;
+            
+            output += "SUCCESSFUL APPLICATIONS:\n";
+            output += `Situation: ${formData.successSituation || 'Not completed'}\n`;
+            output += `Concept Applied: ${formData.successConcept || 'Not completed'}\n`;
+            output += `Result: ${formData.successResult || 'Not completed'}\n\n`;
+            
+            output += "CHALLENGING APPLICATIONS:\n";
+            output += `Situation: ${formData.challengeSituation || 'Not completed'}\n`;
+            output += `Concept Attempted: ${formData.challengeConcept || 'Not completed'}\n`;
+            output += `Lesson Learned: ${formData.challengeResult || 'Not completed'}\n\n`;
+            
+            output += "COMPETENCY ASSESSMENT\n";
+            output += "---------------------\n";
+            output += `Mentee Self-Assessment: ${formData.selfAssessment || 'Not completed'}\n`;
+            output += `Mentor Assessment: ${formData.mentorAssessment || 'Not completed'}\n`;
+            output += `AGCelerate U Connection: ${formData.agcelerateConnection || 'Not completed'}\n\n`;
+            
+            output += `Specific Example: ${formData.specificExample || 'Not completed'}\n\n`;
+            output += `Mentor Observations: ${formData.mentorObservationsCompetency || 'Not completed'}\n\n`;
+            
+            output += "DEVELOPMENT PLANNING\n";
+            output += "--------------------\n";
+            output += `Development Target: ${formData.developmentTarget || 'Not completed'}\n`;
+            output += `Action Steps: ${formData.actionSteps || 'Not completed'}\n`;
+            output += `Support Needed: ${formData.supportNeeded || 'Not completed'}\n\n`;
+            
+            output += "LEARNING OBJECTIVES\n";
+            output += "-------------------\n";
+            output += `Objective 1 - Skill: ${formData.obj1Skill || 'Not completed'}\n`;
+            output += `Target Date: ${formData.obj1Date || 'Not set'}\n`;
+            output += `Success Measure: ${formData.obj1Measure || 'Not defined'}\n\n`;
+            
+            output += `Objective 2 - Application: ${formData.obj2Application || 'Not completed'}\n`;
+            output += `Target Date: ${formData.obj2Date || 'Not set'}\n`;
+            output += `Success Measure: ${formData.obj2Measure || 'Not defined'}\n\n`;
+            
+            output += `Objective 3 - Impact: ${formData.obj3Impact || 'Not completed'}\n`;
+            output += `Target Date: ${formData.obj3Date || 'Not set'}\n`;
+            output += `Success Measure: ${formData.obj3Measure || 'Not defined'}\n\n`;
+            
+            output += "COMMITMENTS & NEXT STEPS\n";
+            output += "------------------------\n";
+            output += `Mentor Commitments: ${formData.mentorCommitments || 'Not completed'}\n\n`;
+            output += `Mentee Commitments: ${formData.menteeCommitments || 'Not completed'}\n\n`;
+            output += `Key Takeaways: ${formData.keyTakeaways || 'Not completed'}\n\n`;
+            output += `Next Meeting Date: ${formData.nextMeetingDate || 'Not scheduled'}\n\n`;
+            
+            output += "FINAL NOTES\n";
+            output += "-----------\n";
+            output += `Mentor Notes: ${formData.mentorFinalNotes || 'No additional notes'}\n\n`;
+            output += `Mentee Reflections: ${formData.menteeFinalReflections || 'No additional reflections'}\n\n`;
+            
+            output += "SIGNATURES\n";
+            output += "----------\n";
+            output += `Mentor: ${formData.mentorSignature || 'Not signed'}\n`;
+            output += `Mentee: ${formData.menteeSignature || 'Not signed'}\n\n`;
+            
+            output += `Report generated: ${new Date().toLocaleString()}\n`;
+            
+            const blob = new Blob([output], {type: 'text/plain'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            const menteeName = formData.menteeName || 'Mentee';
+            const mentorName = formData.mentorName || 'Mentor';
+            const date = formData.date || 'Session';
+            link.download = `MentorSession_Report_${menteeName}_${mentorName}_${date}.txt`;
+            link.click();
+            
+            showToast('Report exported successfully', 'success');
+        }
+
+        // Clear form
+        function clearForm() {
+            if (confirm('Are you sure you want to clear all form data? This cannot be undone.')) {
+                const formElements = document.querySelectorAll('input, select, textarea');
+                formElements.forEach(element => {
+                    if (element.type !== 'date' || element.id !== 'date') {
+                        element.value = '';
+                    }
+                });
+                localStorage.removeItem('mentorSessionAutoSave');
+                showToast('Form cleared', 'success');
+            }
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Print functionality
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'p') {
+                window.print();
+            }
+        });
+
+        // Add input listeners for auto-save
+        document.addEventListener('input', function(event) {
+            if (event.target.matches('input, select, textarea')) {
+                clearTimeout(window.inputTimeout);
+                window.inputTimeout = setTimeout(() => {
+                    autoSave();
+                }, 2000); // Save 2 seconds after user stops typing
+            }
+        });
+    </script>
+</body>
+</html>
